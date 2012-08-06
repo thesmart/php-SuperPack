@@ -10,6 +10,7 @@ execution order.
 TODO List
 ---------
 
+ * Create a cache backed library to compile scripts using Closure Compiler
  * Create script to upload files to Amazon S3, Akamai, and other popular CDNs
 
 Example
