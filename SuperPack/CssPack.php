@@ -10,26 +10,24 @@ class CssPack extends Pack {
 	/**
 	 * Render styles in the head tag.
 	 * NOTE: IE-specific style overrides will be rendered LAST
-	 * @static
 	 * @return string
 	 */
-	public static function renderHead() {
-		return parent::renderHead() . "\n" . static::renderIe();
+	public function renderHead() {
+		return parent::renderHead() . "\n" . $this->renderIe();
 	}
 
 	/**
 	 * Render a single script
 	 *
-	 * @static
 	 * @param string $entity
 	 * @return string
 	 */
-	protected static function renderEntity($entity) {
-		if (filter_var($entity, FILTER_VALIDATE_URL)) {
+	protected function renderEntity($entity) {
+		if (static::isPath($entity)) {
 			return <<<MARKUP
 <link href="$entity" rel="stylesheet">
 MARKUP;
-		} else if (static::isMarkup($entity)) {
+		} else if ($this->isMarkup($entity)) {
 			// some kind of markup
 			return $entity;
 		} else {

@@ -10,26 +10,24 @@ class JsPack extends Pack {
 	/**
 	 * Render styles in the head tag.
 	 * NOTE: IE-specific scripts will be rendered FIRST
-	 * @static
 	 * @return string
 	 */
-	public static function renderHead() {
-		return static::renderIe() . "\n" . parent::renderHead();
+	public function renderHead() {
+		return $this->renderIe() . "\n" . parent::renderHead();
 	}
 
 	/**
 	 * Render a single style
 	 *
-	 * @static
 	 * @param string $entity
 	 * @return string
 	 */
-	protected static function renderEntity($entity) {
-		if (filter_var($entity, FILTER_VALIDATE_URL)) {
+	protected function renderEntity($entity) {
+		if (static::isPath($entity)) {
 			return <<<MARKUP
 <script src="$entity"></script>
 MARKUP;
-		} else if (static::isMarkup($entity)) {
+		} else if ($this->isMarkup($entity)) {
 			// some kind of markup
 			return $entity;
 		} else {

@@ -2,49 +2,50 @@
 
 namespace SuperPack;
 
+use singleton\Singleton;
+
 /**
  * A base class for static package management
  */
-abstract class Pack {
+abstract class Pack extends Singleton {
 
 	/**
 	 * @var array
 	 */
-	public static $packs = array();
+	public $packs = array();
 
 	/**
 	 * @var array
 	 */
-	public static $forIe = array();
+	public $forIe = array();
 
 	/**
 	 * @var array
 	 */
-	public static $forHead	= array();
+	public $forHead	= array();
 
 	/**
 	 * @var array
 	 */
-	public static $forBody	= array();
+	public $forBody	= array();
 
 	/**
 	 * @var array
 	 */
-	public static $forDomReady	= array();
+	public $forDomReady	= array();
 
 	/**
 	 * Register a package as available for inclusion using one of the incl* methods
 	 *
-	 * @static
 	 * @param string $name		A name for the package
 	 * @param array $code		An array of paths references code snippets or files
 	 */
-	public static function register($name, $code) {
-		if (isset(static::$packs[$name])) {
+	public function register($name, $code) {
+		if (isset($this->packs[$name])) {
 			// merge
-			static::$packs[$name]	= array_merge(static::$packs[$name], $code);
+			$this->packs[$name]	= array_merge($this->packs[$name], $code);
 		} else {
-			static::$packs[$name]	= $code;
+			$this->packs[$name]	= $code;
 		}
 	}
 
@@ -53,8 +54,8 @@ abstract class Pack {
 	 * @param array|string $codePackOrPath
 	 * @return void
 	 */
-	public static function inclHead($codePackOrPath) {
-		static::$forHead[]	= $codePackOrPath;
+	public function inclHead($codePackOrPath) {
+		$this->forHead[]	= $codePackOrPath;
 	}
 	
 	/**
@@ -62,8 +63,8 @@ abstract class Pack {
 	 * @param array|string $codePackOrPath
 	 * @return void
 	 */
-	public static function inclBody($codePackOrPath) {
-		static::$forBody[]	= $codePackOrPath;
+	public function inclBody($codePackOrPath) {
+		$this->forBody[]	= $codePackOrPath;
 	}
 
 	/**
@@ -71,8 +72,8 @@ abstract class Pack {
 	 * @param array|string $codePackOrPath
 	 * @return void
 	 */
-	public static function inclDomReady($codePackOrPath) {
-		static::$forDomReady[]	= $codePackOrPath;
+	public function inclDomReady($codePackOrPath) {
+		$this->forDomReady[]	= $codePackOrPath;
 	}
 
 	/**
@@ -80,56 +81,51 @@ abstract class Pack {
 	 *
 	 * @link http://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx
 	 *
-	 * @static
 	 * @param array|string $codePackOrPath
 	 * @param int $minVer			min version you want to render this script for (inclusive)
 	 * @param int $maxVer			max version you want to render this script for (inclusive)
 	 */
-	public static function inclIE($codePackOrPath, $minVer, $maxVer) {
+	public function inclIE($codePackOrPath, $minVer, $maxVer) {
 		$minVer2	= $minVer;
 		$maxVer2	= $maxVer;
 
 		$minVer		= min($minVer2, $maxVer2);
 		$maxVer		= max($minVer2, $maxVer2);
 
-		static::$forIe[]	= compact('minVer', 'maxVer', 'codePackOrPath');
+		$this->forIe[]	= compact('minVer', 'maxVer', 'codePackOrPath');
 	}
 
 	/**
 	 * Render packages included to be emitted in the head tag
-	 * @static
 	 * @return string
 	 */
-	public static function renderHead() {
-		return static::renderPackages(static::$forHead);
+	public function renderHead() {
+		return $this->renderPackages($this->forHead);
 	}
 
 	/**
 	 * Render packages included to be emitted right after opening body tag
-	 * @static
 	 * @return string
 	 */
-	public static function renderBody() {
-		return static::renderPackages(static::$forBody);
+	public function renderBody() {
+		return $this->renderPackages($this->forBody);
 	}
 
 	/**
 	 * Render packages included to be emitted right before closing body tag
-	 * @static
 	 * @return string
 	 */
-	public static function renderDomReady() {
-		return static::renderPackages(static::$forDomReady);
+	public function renderDomReady() {
+		return $this->renderPackages($this->forDomReady);
 	}
 
 	/**
 	 * Render packages included to be emitted and excuted for IE only
-	 * @static
 	 * @return string
 	 */
-	public static function renderIe() {
+	public function renderIe() {
 		$ieScripts = array();
-		foreach (static::$forIe as $instruction) {
+		foreach ($this->forIe as $instruction) {
 			/**
 			 * @var int $minVer
 			 * @var int $maxVer
@@ -140,7 +136,7 @@ abstract class Pack {
 			$ieScripts[] = <<<OPEN
 <!--[if (gte IE $minVer)&(lte IE $maxVer)]>
 OPEN;
-			$ieScripts[] = static::renderEntity($codePackOrPath);
+			$ieScripts[] = $this->renderEntity($codePackOrPath);
 			$ieScripts[] = <<<CLOSE
 <![endif]-->
 CLOSE;
@@ -151,46 +147,63 @@ CLOSE;
 
 	/**
 	 * Reset Pack to base state.
-	 * @static
 	 */
-	public static function reset() {
-		static::$packs = array();
-		static::$forIe = array();
-		static::$forHead	= array();
-		static::$forBody	= array();
-		static::$forDomReady	= array();
+	public function reset() {
+		$this->packs = array();
+		$this->forIe = array();
+		$this->forHead	= array();
+		$this->forBody	= array();
+		$this->forDomReady	= array();
 	}
 
 	/**
 	 * Is a string a script tag or something else that should be emitted to the page directly?
-	 * @static
 	 * @param string $string
 	 * @return bool
 	 */
-	protected static function isMarkup($string) {
+	protected function isMarkup($string) {
 		return mb_substr($string, 0, 1) === '<';
+	}
+
+	/**
+	 * Determine if a string is actually a path, relative or absolute
+	 * @param string $string
+	 * @return bool
+	 */
+	protected function isPath($string) {
+		if (mb_strlen($string) > 500) {
+			// likely a script
+			return false;
+		}
+
+		$slashPos = mb_stripos($string, '/');
+		if (is_int($slashPos) && mb_stripos($string, '/') < 30) {
+			// slash is one of the first 30 chars
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
 	 * Given an array packages, render markup to include the packages
 	 *
-	 * @static
 	 * @param array $packages
 	 * @return string
 	 */
-	protected static function renderPackages(array $packages) {
+	protected function renderPackages(array $packages) {
 		$buff	= array();
 
 		foreach ($packages as $codePackOrPath) {
-			if (array_key_exists($codePackOrPath, static::$packs)) {
+			if (array_key_exists($codePackOrPath, $this->packs)) {
 				// a registered package
-				foreach (static::$packs[$codePackOrPath] as $src) {
-					$buff[] = static::renderEntity($src);
+				foreach ($this->packs[$codePackOrPath] as $src) {
+					$buff[] = $this->renderEntity($src);
 				}
 			} else {
 				// a single entity
 				$codeOrPath = $codePackOrPath;
-				$buff[] = static::renderEntity($codeOrPath);
+				$buff[] = $this->renderEntity($codeOrPath);
 			}
 		}
 
@@ -200,10 +213,9 @@ CLOSE;
 	/**
 	 * Given a single entity, render markup to include the entity
 	 *
-	 * @static
 	 * @abstract
 	 * @param string $entity
 	 * @return string
 	 */
-	protected abstract static function renderEntity($entity);
+	protected abstract function renderEntity($entity);
 }
