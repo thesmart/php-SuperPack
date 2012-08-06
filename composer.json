@@ -1,5 +1,5 @@
 {
-	"name": "thesmart/SuperPack",
+	"name": "thesmart/super-pack",
 	"type": "library",
 	"description": "A package management tool that optimizes CSS and JavaScript download times",
 	"keywords": ["package","package manager","javascript","css","static","optimize"],
