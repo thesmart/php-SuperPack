@@ -88,7 +88,7 @@ $CSS_PACK->register(CSS_BASE, array(
 
 // ...later during run-time
 $CSS_PACK->inclHead(CSS_BASE);
-```php
+```
 
 Render the scripts into your markup templates:
 
